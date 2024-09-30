@@ -1,0 +1,236 @@
+// This is your Prisma schema file, learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+//Admin model
+model Admin {
+  //Note: for users (Admin/Student/Teacher/Parent) models, we use id -> String, so we can use it in auth .. but other models we use id -> int autoincrement()
+  id       String @id        
+  username String @unique                     
+}
+
+
+//Student model
+model Student {
+  id          String       @id
+  username    String       @unique
+  name        String
+  surname     String
+  email       String?      @unique            //? (optional) value
+  phone       String?      @unique
+  address     String
+  img         String?
+  bloodType   String
+  sex         UserSex      //manually created enum Type (check the bottom of the file)
+  createdAt   DateTime     @default(now())            //now() to get current time 
+  birthday    DateTime
+  //define parent model relation with Student model (1 parent -> n Students) using (field-name: parentId, reference-value: parent model id)
+  parent      Parent       @relation(fields: [parentId], references: [id])  
+  parentId    String
+  //define Class model relation with Student model (1 Class -> n Students) using (field-name: classId, reference-value: class model id)
+  class       Class        @relation(fields: [classId], references: [id])
+  classId     Int
+  //define Grade model relation with Student model (1 Grade -> n Students) using (field-name: gradeId, reference-value: grade model id)
+  grade       Grade        @relation(fields: [gradeId], references: [id])
+  gradeId     Int
+  attendances Attendance[]        //(1 -> n) relation between Student model & Attendance[] model
+  results     Result[]            //(1 -> n) relation between Student model & Result[] model
+}
+
+
+//Teacher model
+model Teacher {
+  id        String    @id
+  username  String    @unique
+  name      String
+  surname   String
+  email     String?   @unique
+  phone     String?   @unique
+  address   String
+  img       String?
+  bloodType String
+  sex       UserSex   //manually created enum Type (check the bottom of the file)
+  createdAt DateTime  @default(now())
+  subjects  Subject[]         //(n -> n) relation between Teacher[] model & Subject[] model
+  lessons   Lesson[]          //(1 -> n) relation between Teacher model & Lesson[] model
+  classes   Class[]           //(1 -> n) relation between Teacher model & Class[] model
+  birthday  DateTime
+}
+
+
+//Parent model
+model Parent {
+  id        String    @id
+  username  String    @unique
+  name      String
+  surname   String
+  email     String?   @unique
+  phone     String    @unique
+  address   String
+  createdAt DateTime  @default(now())
+  students  Student[]           //(1 -> n) relation between Parent model & student[] model
+}
+
+
+//Grade model
+model Grade {
+  id    Int @id @default(autoincrement())
+  level Int @unique
+  students Student[]       //(1 -> n) relation between Grade model & student[] model  
+  classess Class[]         //(1 -> n) relation between Grade model & Class[] model
+}
+
+
+//Class model
+model Class {
+  id       Int    @id @default(autoincrement())
+  name     String @unique
+  capacity Int
+  //define Teacher model relation with Class model (1 Teacher -> n Classes) using (field-name: supervisorId, reference-value: Teacher model id)
+  supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
+  supervisorId  String?
+  lessons       Lesson[]       //(1 -> n) relation between Class model & Lesson[] model
+  students      Student[]      //(1 -> n) relation between Class model & Student[] model
+  //define Grade model relation with Class model (1 Grade -> n Classes) using (field-name: gradeId, reference-value: grade model id)
+  grade         Grade          @relation(fields: [gradeId], references: [id])
+  gradeId       Int
+  events        Event[]               //(1 -> n) relation between Class model & Event[] model
+  announcements Announcement[]        //(1 -> n) relation between Class model & Announcement[] model
+}
+
+
+//Subject model
+model Subject {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  teachers Teacher[]      //(n -> n) relation between Subject[] model & Teacher[] model
+  lessons  Lesson[]       //(1 -> n) relation between Subject model & Lesson[] model
+}
+
+
+//Lesson model
+model Lesson {
+  id        Int      @id @default(autoincrement())
+  name      String
+  day       Day           //manually created enum Type (check the bottom of the file)
+  startTime DateTime
+  endTime   DateTime
+  //define Subject model relation with Lesson model (1 Subject -> n Lessons) using (field-name: subjectId, reference-value: subject model id)   
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  subjectId   Int
+  //define Class model relation with Lesson model (1 Class -> n Lessons) using (field-name: classId, reference-value: class model id)   
+  class       Class        @relation(fields: [classId], references: [id])
+  classId     Int
+  //define Teacher model relation with Lesson model (1 Teacher -> n Lessons) using (field-name: teacherId, reference-value: teacher model id)   
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  teacherId   String
+  exams       Exam[]           //(1 -> n) relation between Lesson model & Exam[] model
+  assignments Assignment[]     //(1 -> n) relation between Lesson model & Assignment[] model
+  attendances Attendance[]     //(1 -> n) relation between Lesson model & Attendance[] model
+}
+
+
+//Exam model
+model Exam {
+  id        Int      @id @default(autoincrement())
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  //define Lesson model relation with Exam model (1 Lesson -> n Exams) using (field-name: lessonId , reference-value: lesson model id)   
+  lesson   Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId Int
+  results  Result[]     //(1 -> n) relation between Exam model & Result[] model
+}
+
+
+//Assignment model
+model Assignment {
+  id        Int      @id @default(autoincrement())
+  title     String
+  startDate DateTime
+  dueDate   DateTime
+  //define Lesson model relation with Assignment model (1 Lesson -> n Assignments) using (field-name: lessonId , reference-value: lesson model id)   
+  lesson   Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId Int
+  results  Result[]     //(1 -> n) relation between Assignment model & Result[] model
+}
+
+
+//Result model
+model Result {
+  id    Int @id @default(autoincrement())
+  score Int
+  //define Exam model relation with Result model (1 Exam -> n Results) using (field-name: ExamId , reference-value: Exam model id)   
+  exam         Exam?       @relation(fields: [examId], references: [id])
+  examId       Int?
+  //define Assignment model relation with Result model (1 Assignment -> n Results) using (field-name: AssignmentId , reference-value: Assignment model id)   
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id])
+  assignmentId Int?
+  //define Student model relation with Result model (1 Student -> n Results) using (field-name: StudentId , reference-value: Student model id)   
+  student      Student     @relation(fields: [studentId], references: [id])
+  studentId    String
+}
+
+
+//Attendance model
+model Attendance {
+  id      Int      @id @default(autoincrement())
+  date    DateTime
+  present Boolean
+  //define Student model relation with Attendance model (1 Student -> n Attendances) using (field-name: StudentId , reference-value: Student model id)   
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  //define Lesson model relation with Attendance model (1 Lesson -> n Attendances) using (field-name: LessonId , reference-value: Lesson model id)
+  lesson    Lesson  @relation(fields: [lessonId], references: [id])
+  lessonId  Int
+}
+
+
+//Event model
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  startTime   DateTime
+  endTime     DateTime
+  //define Class model relation with Event model (1 Class -> n Events) using (field-name: classId , reference-value: class model id)
+  class   Class? @relation(fields: [classId], references: [id])
+  classId Int?
+}
+
+
+//Announcement model
+model Announcement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime
+  //define Class model relation with Announcement model (1 Class -> n Announcements) using (field-name: classId , reference-value: class model id)
+  class   Class? @relation(fields: [classId], references: [id])
+  classId Int?
+}
+
+
+
+//Type for UserSex optins (enum: a group of constants/unchangeable values)
+enum UserSex {
+  MALE
+  FEMALE
+}
+//Type for Day optins (enum: a group of constants/unchangeable values)
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
