@@ -35,5 +35,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+/public/App-Structure/
+
+/src/lib/actions/1.Note.txt
 
 .env

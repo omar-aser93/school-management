@@ -1,10 +1,16 @@
-import Announcements from "@/components/Announcements";
-import BigCalendar from "@/components/BigCalender";
-import Performance from "@/components/Performance";
+import Announcements from "@/components/general/Announcements";
+import BigCalendarContainer from "@/components/calendars/BigCalendarContainer"
+import Performance from "@/components/charts/Performance";
+import { getStudent } from "@/lib/actions/student.actions";
 import Image from "next/image";
 import Link from "next/link";
 
-const SingleStudentPage = () => {
+
+const SingleStudentPage = async ({params: { id }}: { params: { id: string } }) => {   //get id param from [id] folder_name
+
+  const student = await getStudent(id);
+  if (!student) {  return <h2> Not found</h2> }
+
   return (
     <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
       {/* LEFT */}
@@ -80,7 +86,7 @@ const SingleStudentPage = () => {
         {/* BOTTOM */}
         <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
           <h1>Student&apos;s Schedule</h1>
-          <BigCalendar />
+          <BigCalendarContainer type="class" id={student?.classId!}/>     {/* pass the type "class" & the id */}
         </div>
       </div>
       {/* RIGHT */}
@@ -88,11 +94,11 @@ const SingleStudentPage = () => {
         <div className="bg-white p-4 rounded-md">
           <h1 className="text-xl font-semibold">Shortcuts</h1>
           <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
-            <Link className="p-3 rounded-md bg-schoolSkyLight" href="/"> Student&apos;s Lessons </Link>
-            <Link className="p-3 rounded-md bg-schoolPurpleLight" href="/"> Student&apos;s Teachers </Link>
-            <Link className="p-3 rounded-md bg-pink-50" href="/"> Student&apos;s Exams </Link>
-            <Link className="p-3 rounded-md bg-schoolSkyLight" href="/"> Student&apos;s Assignments </Link>
-            <Link className="p-3 rounded-md bg-schoolYellowLight" href="/"> Student&apos;s Results </Link>
+            <Link className="p-3 rounded-md bg-schoolSkyLight" href={`/list/lessons?classId=${student.class.id}`}> Student&apos;s Lessons </Link>
+            <Link className="p-3 rounded-md bg-schoolPurpleLight" href={`/list/teachers?classId=${student.class.id}`}> Student&apos;s Teachers </Link>
+            <Link className="p-3 rounded-md bg-pink-50" href={`/list/exams?classId=${student.class.id}`}> Student&apos;s Exams </Link>
+            <Link className="p-3 rounded-md bg-schoolSkyLight" href={`/list/assignments?classId=${student.class.id}`}> Student&apos;s Assignments </Link>
+            <Link className="p-3 rounded-md bg-schoolYellowLight" href={`/list/results?studentId=${student.id}`}> Student&apos;s Results </Link>
           </div>
         </div>
         <Performance />

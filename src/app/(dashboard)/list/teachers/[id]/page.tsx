@@ -1,12 +1,21 @@
-import Announcements from "@/components/Announcements";
-import BigCalendar from "@/components/BigCalender";
-import FormModal from "@/components/FormModal";
-import Performance from "@/components/Performance";
-import { role } from "@/lib/data";
+import Announcements from "@/components/general/Announcements";
+import BigCalendarContainer from "@/components/calendars/BigCalendarContainer";
+import FormModal from "@/components/forms/FormModal";
+import Performance from "@/components/charts/Performance";
+import { getTeacher } from "@/lib/actions/teacher.actions";
+import { auth } from "@clerk/nextjs/server";           //clerk auth() preferred with pages (inside App router)
 import Image from "next/image";
 import Link from "next/link";
 
-const SingleTeacherPage = () => {
+
+const SingleTeacherPage = async ({params: { id }}: { params: { id: string } }) => {   //get id param from [id] folder_name
+  
+  const { sessionClaims } = auth();            //clerk auth() hook to get current session_user data
+  const role = (sessionClaims?.metadata as { role?: string })?.role;    //get user role from the session metadata
+  
+  const teacher = await getTeacher(id);         //getTeacher() function to get a single teacher by id
+  if (!teacher) { return <h2> Not found</h2> }
+  
   return (
     <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
       {/* LEFT */}
@@ -92,7 +101,7 @@ const SingleTeacherPage = () => {
         {/* BOTTOM */}
         <div className="mt-4 bg-white rounded-md p-4 h-[800px]">
           <h1>Teacher&apos;s Schedule</h1>
-          <BigCalendar />
+          <BigCalendarContainer type="teacher" id={id}/>        {/* pass the type "teacher" & the id */}
         </div>
       </div>
       {/* RIGHT */}
@@ -100,11 +109,11 @@ const SingleTeacherPage = () => {
         <div className="bg-white p-4 rounded-md">
           <h1 className="text-xl font-semibold">Shortcuts</h1>
           <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
-            <Link className="p-3 rounded-md bg-schoolSkyLight" href="/"> Teacher&apos;s Classes </Link>
-            <Link className="p-3 rounded-md bg-schoolPurpleLight" href="/"> Teacher&apos;s Students </Link>
-            <Link className="p-3 rounded-md bg-schoolYellowLight" href="/"> Teacher&apos;s Lessons </Link>
-            <Link className="p-3 rounded-md bg-pink-50" href="/"> Teacher&apos;s Exams </Link>
-            <Link className="p-3 rounded-md bg-schoolSkyLight" href="/"> Teacher&apos;s Assignments </Link>
+            <Link className="p-3 rounded-md bg-schoolSkyLight" href={`/list/classes?supervisorId=${teacher.id}`}> Teacher&apos;s Classes </Link>
+            <Link className="p-3 rounded-md bg-schoolPurpleLight" href={`/list/students?teacherId=${teacher.id}`}> Teacher&apos;s Students </Link>
+            <Link className="p-3 rounded-md bg-schoolYellowLight" href={`/list/lessons?teacherId=${teacher.id}`}> Teacher&apos;s Lessons </Link>
+            <Link className="p-3 rounded-md bg-pink-50" href={`/list/exams?teacherId=${teacher.id}`}> Teacher&apos;s Exams </Link>
+            <Link className="p-3 rounded-md bg-schoolSkyLight" href={`/list/assignments?teacherId=${teacher.id}`}> Teacher&apos;s Assignments </Link>
           </div>
         </div>
         <Performance />

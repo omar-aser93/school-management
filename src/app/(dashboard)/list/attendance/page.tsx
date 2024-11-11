@@ -1,8 +1,11 @@
-
+import AttendanceChartContainer from "@/components/charts/AttendanceChartContainer"
 
 const AttendanceListPage = () => {
   return (
-    <div>Attendance List Page</div>
+    <div className="flex flex-col justify-center p-20 gap-10">
+      <h1>Attendance this week</h1>
+      <AttendanceChartContainer/>
+    </div>
   )
 }
 
