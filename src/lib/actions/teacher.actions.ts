@@ -38,7 +38,7 @@ export const createTeacher = async (currentState: { success: boolean; error: boo
         },
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/teachers");          //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -80,7 +80,7 @@ export const updateTeacher = async (currentState: { success: boolean; error: boo
         },
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/teachers");          //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -90,14 +90,13 @@ export const updateTeacher = async (currentState: { success: boolean; error: boo
 
 
 
-// deleteTeacher Server_action, we pass (success/error State, FormData because we're not using "react-hook-form" & Validation with delete form )
-export const deleteTeacher = async (currentState: { success: boolean; error: boolean }, data: FormData) => {
-  const id = data.get("id") as string;
+// deleteTeacher Server_action, we pass (success/error State, FormData directly because we're not using "react-hook-form" & Validation with delete form )
+export const deleteTeacher = async (currentState: { success: boolean; error: boolean }, formData: FormData) => {
   try {
     //clerkClient.users.deleteUser() to delete a clerk user by the id, prisma.delete() to delete a teacher in the DB by the id
-    await clerkClient.users.deleteUser(id);
-    await prisma.teacher.delete({ where: { id: id } });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    await clerkClient.users.deleteUser(formData.get("id") as string);
+    await prisma.teacher.delete({ where: { id: formData.get("id") as string } });
+    revalidatePath("/list/teachers");          //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -108,7 +107,7 @@ export const deleteTeacher = async (currentState: { success: boolean; error: boo
 
 
 // getTeachers function, to fetch filtered teachers data 
-export const getTeachers = async (query: any, currentPage: number, Items_Per_Page: number) => {
+export const getTeachers = async (query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check query value, as we need to get either 1 of 2 filtered lists: 1st list (search by teacher_name list) we get query directly from the search input   
       2nd list (teachers of specific student list) more complex relation query: each teacher have lessons, each lesson have the class of the student */
@@ -135,6 +134,7 @@ export const getTeachers = async (query: any, currentPage: number, Items_Per_Pag
       include: { subjects: true, classes: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { name: sort },
     });
     const count = await prisma.teacher.count({ where: q });     //get filtered teachers count, we use it to get the numberOfPages
     return { teachersData, numberOfPages: Math.ceil(count / Items_Per_Page) };   //return filtered teachers data & (number of pages) that will be used in Pagination

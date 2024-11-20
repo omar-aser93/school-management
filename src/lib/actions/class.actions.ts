@@ -11,7 +11,7 @@ export const createClass = async (currentState: { success: boolean; error: boole
   try {
     //prisma.create() to create new class in the DB, set data object with received (inputs & related data) 
     await prisma.class.create({ data });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/classes");           //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -29,7 +29,7 @@ export const updateClass = async (currentState: { success: boolean; error: boole
       where: { id: data.id },
       data
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/classes");           //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -39,14 +39,14 @@ export const updateClass = async (currentState: { success: boolean; error: boole
 
 
 
-// deleteClass Server_action, we pass (success/error State, FormData because we're not using "react-hook-form" & Validation with delete form )
+// deleteClass Server_action, we pass (success/error State, FormData directly because we're not using "react-hook-form" & Validation with delete form )
 export const deleteClass = async (currentState: { success: boolean; error: boolean }, formData: FormData) => {
   try {
     //prisma.delete() to delete a class in the DB by the id
     await prisma.class.delete({
       where: { id: parseInt(formData.get("id") as string) }   //get the id from the formData (sent in a hidden form input)
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/classes");           //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -57,7 +57,7 @@ export const deleteClass = async (currentState: { success: boolean; error: boole
 
 
 // getClasses function, to fetch filtered classes data 
-export const getClasses = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getClasses = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check the query value, as we need to get either 1 of 2 filtered lists: 1st list (search by class_name list) we get query directly from the search input   
       2nd list (Classes of a specific supervisor_teacher list) : using the relation between class model & teacher model */
@@ -82,6 +82,7 @@ export const getClasses = async ( query: any, currentPage: number, Items_Per_Pag
       include: { supervisor: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { name: sort },
     });
     const count = await prisma.class.count({ where: q });      //get filtered classes count, we use it to get the numberOfPages
     return { classesData, numberOfPages: Math.ceil(count / Items_Per_Page) };    //return filtered classes data & (number of pages) that will be used in Pagination

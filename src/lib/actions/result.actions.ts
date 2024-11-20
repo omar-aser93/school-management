@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";    //getting Typescript types from the 
 
 
 // getResults function, to fetch filtered results data
-export const getResults = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getResults = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check query value, as we need to get either 1 of 2 filtered lists: 1st list (search by exam/student list) we get query directly from the search input   
       2nd list (results of specific student list) using the relation between result model & student model*/
@@ -69,6 +69,7 @@ export const getResults = async ( query: any, currentPage: number, Items_Per_Pag
       },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { score: sort },
     });
     const count = await prisma.result.count({ where: q });     //get filtered results count, we use it to get the numberOfPages
     return { resultsData, numberOfPages: Math.ceil(count / Items_Per_Page) };     //return filtered results data & (number of pages) that will be used in Pagination

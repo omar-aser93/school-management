@@ -43,13 +43,13 @@ const ExamForm = ({ type, data, setOpen, relatedData}: { type: "create" | "updat
 
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Start Date</label>
-          <input type="text" {...register("startTime")} defaultValue={data?.startTime} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
+          <input type="datetime-local" {...register("startTime")} defaultValue={data?.startTime} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
           {errors?.startTime?.message && ( <p className="text-xs text-red-400">{errors?.startTime.message.toString()}</p> )}
         </div>
 
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">End Date</label>
-          <input type="text" {...register("endTime")} defaultValue={data?.endTime} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
+          <input type="datetime-local" {...register("endTime")} defaultValue={data?.endTime} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
           {errors?.endTime?.message && ( <p className="text-xs text-red-400">{errors?.endTime.message.toString()}</p> )}
         </div>
 
@@ -66,9 +66,9 @@ const ExamForm = ({ type, data, setOpen, relatedData}: { type: "create" | "updat
 
         {/* Sending the id in a hidden input, used in (update & delete) server_action */}          
         {data && (
-          <div className="flex flex-col gap-2 w-full md:w-1/4" hidden>
+          <div className="invisible flex flex-col gap-2 w-full md:w-1/4" >
             <label className="text-xs text-gray-500">Id</label>
-            <input type="text" {...register("id")} defaultValue={data?.id} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
+            <input type="text" {...register("id")} defaultValue={data?.id} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" hidden/>
             {errors?.id?.message && ( <p className="text-xs text-red-400">{errors?.id.message.toString()}</p> )}
           </div> )}
       </div>

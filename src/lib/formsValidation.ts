@@ -38,7 +38,7 @@ export const studentSchema = z.object({
   sex: z.enum(["MALE", "FEMALE"], { message: "Sex is required!" }),
   gradeId: z.coerce.number().min(1, { message: "Grade is required!" }),
   classId: z.coerce.number().min(1, { message: "Class is required!" }),
-  parentId: z.string().min(1, { message: "Parent Id is required!" }),
+  parentId: z.string().min(1, { message: "Parent Id is required!" }),        
 });
 export type StudentSchemaType = z.infer<typeof studentSchema>;      //Typescript zod Schema type
 
@@ -57,7 +57,7 @@ export type SubjectSchemaType = z.infer<typeof subjectSchema>;      //Typescript
 //class zod Schema
 export const classSchema = z.object({
   id: z.coerce.number().optional(),
-  name: z.string().min(1, { message: "Subject name is required!" }),
+  name: z.string().min(1, { message: "Class name is required!" }),
   capacity: z.coerce.number().min(1, { message: "Capacity is required!" }),
   gradeId: z.coerce.number().min(1, { message: "Grade is required!" }),
   supervisorId: z.coerce.string().optional(),
@@ -69,7 +69,7 @@ export type ClassSchemaType = z.infer<typeof classSchema>;        //Typescript z
 //exam zod Schema
 export const examSchema = z.object({
   id: z.coerce.number().optional(),
-  title: z.string().min(1, { message: "Title name is required!" }),
+  title: z.string().min(1, { message: "Exam Title is required!" }),
   startTime: z.coerce.date({ message: "Start time is required!" }),
   endTime: z.coerce.date({ message: "End time is required!" }),
   lessonId: z.coerce.number({ message: "Lesson is required!" }),

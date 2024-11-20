@@ -1,6 +1,7 @@
 import FormModalContainer from "@/components/forms/FormModalContainer";
 import Pagination from "@/components/general/Pagination";
 import Table from "@/components/general/Table";
+import Sort from "@/components/general/Sort";
 import TableSearch from "@/components/general/TableSearch";
 import Image from "next/image";
 import { Assignment, Class, Exam, Result, Student, Teacher } from "@prisma/client";    //getting Typescript types directly from the prisma schema
@@ -54,11 +55,11 @@ const ResultListPage = async ({searchParams}: {searchParams: { [key: string]: st
   );
 
 
-  const {page, ...query}= searchParams ;            //separate URL params to (filter queries) & (page query) 
+  const {page, sort, ...query}= searchParams ;      //separate URL params to (filter queries) & (page param) & (sort param) 
   const currentPage = page ? parseInt(page) : 1;    //convert Page query from string to number, set default to 1
   const Items_Per_Page = 10 ;  
   //using getResults(filter,page queries) function to Fetch {resultsData, numberOfPages}, we pass them to the table & the pagination components
-  const data = await getResults(query, currentPage, Items_Per_Page); 
+  const data = await getResults(query, currentPage, Items_Per_Page, sort); 
 
 
   return (
@@ -72,9 +73,7 @@ const ResultListPage = async ({searchParams}: {searchParams: { [key: string]: st
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-schoolYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-schoolYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
+            <Sort />
             {role === "admin" || role === "teacher" && <FormModalContainer table="result" type="create" />}
           </div>
         </div>

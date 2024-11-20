@@ -5,6 +5,7 @@ import EventCalendarContainer from "@/components/calendars/EventCalendarContaine
 import FinanceChart from "@/components/charts/FinanceChart";
 import UserCard from "@/components/general/UserCard";
 
+
 const AdminPage = ({searchParams}: { searchParams: { [keys: string]: string | undefined }}) => {   //get URL params
   return (
     <div className="p-4 flex gap-4 flex-col md:flex-row">

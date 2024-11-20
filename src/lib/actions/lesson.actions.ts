@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";    //getting Typescript types from the 
 
 
 // getLessons function, to fetch filtered lessons data
-export const getLessons = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getLessons = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check query value, as we need to get either 1 of 3 filtered lists: 1st list (search by subject/teacher list) we get query directly from the search input   
       2nd list (lessons of specific student_by_his_class list) using the relation between lesson model & class model 
@@ -39,6 +39,7 @@ export const getLessons = async ( query: any, currentPage: number, Items_Per_Pag
       },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { name: sort },
     });
     const count = await prisma.lesson.count({ where: q });     //get filtered lessons count, we use it to get the numberOfPages
     return { lessonsData, numberOfPages: Math.ceil(count / Items_Per_Page) };     //return filtered lessons data & (number of pages) that will be used in Pagination

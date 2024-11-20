@@ -1,5 +1,6 @@
 //This is Prisma schema file, created by (npx prisma init) .. for SQL DBs, when we create/change the Prisma schema, we use migrate 
 //(prisma migrate dev --name init) to create/update the tables in your database , but for MongoDB (npx prisma db push) 
+//unlike mongoDB, PosgreSQL needs hosting, here we using vercel/postgres, after finishing schema.prisma follow this -> https://www.youtube.com/watch?v=_ad99LhxBeQ
 
 generator client {
   provider = "prisma-client-js"

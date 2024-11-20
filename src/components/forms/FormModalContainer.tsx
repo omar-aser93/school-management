@@ -48,7 +48,7 @@ const FormModalContainer = async ({ table, type, data, id }: {
         relatedData = { subjects: teacherSubjects };      //set relatedData to (teacherSubjects) to choose from & show in the table
         break;
       case "student":
-        //for student form, get student's grades/classes using prisma.findMany(), select only (grades's level /  ) 
+        //for student form, get student's grades/classes using prisma.findMany(), select only (grades's level / class & class's count used for class capacity) 
         const studentGrades = await prisma.grade.findMany({
           select: { id: true, level: true },
         });
@@ -58,7 +58,8 @@ const FormModalContainer = async ({ table, type, data, id }: {
         relatedData = { classes: studentClasses, grades: studentGrades };    //set relatedData to (studentGrades & studentClasses) to choose from & show in the table
         break;
       case "exam":
-        //for student form, get exam's lessons using prisma.findMany(), select only ( ) 
+        /* for exam form, get exam's lessons using prisma.findMany(), select only (lesson name) 
+        but with condition if current user is teacher: only get his own lessons by his id, if admin then no condition */
         const examLessons = await prisma.lesson.findMany({
           where: {
             ...(role === "teacher" ? { teacherId: userId! } : {}),

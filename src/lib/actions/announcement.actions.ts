@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";   //getting Typescript types from the p
 
 
 // getAnnouncements function, to fetch filtered announcements data (2 types: general announcements , class announcements)
-export const getAnnouncements = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getAnnouncements = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     //we check received query value, as we need to get (search by announcement_title list) we get query directly from the search input
     const q: Prisma.AnnouncementWhereInput = {}; //object to store the query value after conditional test, Typescript type from "@prisma/client"
@@ -53,6 +53,7 @@ export const getAnnouncements = async ( query: any, currentPage: number, Items_P
       include: { class: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { title: sort },
     });
     const count = await prisma.announcement.count({ where: q }); //get filtered announcements count, we use it to get the numberOfPages
     return {announcementsData, numberOfPages: Math.ceil(count / Items_Per_Page) }; //return filtered announcements data & (number of pages) that will be used in Pagination

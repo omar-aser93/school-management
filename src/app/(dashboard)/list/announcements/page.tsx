@@ -1,6 +1,7 @@
 import FormModalContainer from "@/components/forms/FormModalContainer";
 import Pagination from "@/components/general/Pagination";
 import Table from "@/components/general/Table";
+import Sort from "@/components/general/Sort";
 import TableSearch from "@/components/general/TableSearch";
 import { Announcement, Class } from "@prisma/client";        //getting Typescript types directly from the prisma schema
 import { auth } from "@clerk/nextjs/server";                 //clerk auth() preferred with pages (inside App router)
@@ -42,12 +43,11 @@ const AnnouncementListPage = async ({searchParams}: { searchParams: { [key: stri
     </tr>
   );
 
-
-  const {page, ...query}= searchParams ;            //separate URL params to (filter queries) & (page query) 
+  const {page, sort, ...query}= searchParams ;      //separate URL params to (filter queries) & (page param) & (sort param) 
   const currentPage = page ? parseInt(page) : 1;    //convert Page query from string to number, set default to 1
   const Items_Per_Page = 10 ;  
   //using getAnnouncements(filter,page queries) function to Fetch {announcementsData, numberOfPages}, we pass them to the table & the pagination components
-  const data = await getAnnouncements(query, currentPage, Items_Per_Page); 
+  const data = await getAnnouncements(query, currentPage, Items_Per_Page, sort); 
 
 
   return (
@@ -61,9 +61,7 @@ const AnnouncementListPage = async ({searchParams}: { searchParams: { [key: stri
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-schoolYellow">
               <Image src="/filter.png" alt="" width={14} height={14} />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-schoolYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
+            <Sort />
             {role === "admin" && ( <FormModalContainer table="announcement" type="create" /> )}
           </div>
         </div>

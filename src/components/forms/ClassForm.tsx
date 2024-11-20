@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 const ClassForm = ({ type, data, setOpen, relatedData }: {type: "create" | "update"; data?: any; setOpen: Dispatch<SetStateAction<boolean>>; relatedData?: any;}) => {
     
   //using useForm() hook, to handle the form & the inputs, we pass (Zod Schema) to the zodResolver of "react-hook-form" 
-  const {  register, handleSubmit, formState: { errors } } = useForm<ClassSchemaType>({ resolver: zodResolver(classSchema) });
+  const { register, handleSubmit, formState: { errors } } = useForm<ClassSchemaType>({ resolver: zodResolver(classSchema) });
 
   //useFormState/useActionState is a modern react hook used to update a state value based on server action result [in this case, the state named state & the action named formAction & we pass (createClass/updateClass -> the server_action , {success: false, error: false} -> state default value)] 
   const [state, formAction] = useFormState( type === "create" ? createClass : updateClass, { success: false, error: false });
@@ -23,7 +23,7 @@ const ClassForm = ({ type, data, setOpen, relatedData }: {type: "create" | "upda
   //if useFormState() -> {succes:true}, Show succes toast & close the modal  
   useEffect(() => {
     if (state.success) {
-      toast(`Subject has been ${type === "create" ? "created" : "updated"}!`);
+      toast(`Class has been ${type === "create" ? "created" : "updated"}!`);
       setOpen(false);      
     }
   }, [state, type, setOpen]);
@@ -75,9 +75,9 @@ const ClassForm = ({ type, data, setOpen, relatedData }: {type: "create" | "upda
 
         {/* Sending the id in a hidden input, used in (update & delete) server_action  */}
         {data && (
-          <div className="flex flex-col gap-2 w-full md:w-1/4" hidden>
+          <div className="invisible flex flex-col gap-2 w-full md:w-1/4" >
             <label className="text-xs text-gray-500">Id</label>
-            <input type="text" {...register("id")} defaultValue={data?.id} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
+            <input type="text" {...register("id")} defaultValue={data?.id} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" hidden/>
             {errors?.id?.message && ( <p className="text-xs text-red-400">{errors?.id.message.toString()}</p> )}
           </div> )}
       </div>

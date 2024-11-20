@@ -1,5 +1,6 @@
 //seed.ts is for existing data (ex: Dummy data) we want to add to the DB manually at once , check docs: 
-//https://www.prisma.io/docs/orm/prisma-migrate/workflows/seeding#integrated-seeding-with-prisma-migrate
+//https://www.prisma.io/docs/orm/prisma-migrate/workflows/seeding#integrated-seeding-with-prisma-migrate , https://github.com/prisma/prisma/issues/11261
+//(npx prisma studio) is command we use in new terminal to open localhost page of our PostgreSql DB, so we can read & edit in our DB
 
 import { Day, PrismaClient, UserSex } from "@prisma/client";
 const prisma = new PrismaClient();

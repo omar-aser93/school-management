@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";   //getting Typescript types from the p
 
 
 // getEvents function, to fetch filtered events data (2 types: general events , class events)
-export const getEvents = async (query: any, currentPage: number, Items_Per_Page: number) => {
+export const getEvents = async (query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
 
     //we check received query value, as we need to get (search by event_title list) we get query directly from the search input   
@@ -53,6 +53,7 @@ export const getEvents = async (query: any, currentPage: number, Items_Per_Page:
       include: { class: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { title: sort },
     });
     const count = await prisma.event.count({ where: q });     //get filtered events count, we use it to get the numberOfPages
     return { eventsData, numberOfPages: Math.ceil(count / Items_Per_Page)};    //return filtered events data & (number of pages) that will be used in Pagination

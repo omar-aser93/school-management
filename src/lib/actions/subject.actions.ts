@@ -49,7 +49,7 @@ export const updateSubject = async (currentState: { success: boolean; error: boo
 
 
 
-// deleteSubject Server_action, we pass (success/error State, FormData because we're not using "react-hook-form" & Validation with delete form )
+// deleteSubject Server_action, we pass (success/error State, FormData directly because we're not using "react-hook-form" & Validation with delete form )
 export const deleteSubject = async (currentState: { success: boolean; error: boolean }, formData: FormData) => {  
   try {
     //prisma.delete() to delete a subject in the DB by the id
@@ -67,7 +67,7 @@ export const deleteSubject = async (currentState: { success: boolean; error: boo
 
 
 // getSubjects function, to fetch filtered Subjects data 
-export const getSubjects = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getSubjects = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
 
     //we check received query value, as we need to get (search by subject_name list) we get the query directly from the search input   
@@ -88,6 +88,7 @@ export const getSubjects = async ( query: any, currentPage: number, Items_Per_Pa
       include: { teachers: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { name: sort },
     });
     const count = await prisma.subject.count({ where: q });       //get filtered subjects count, we use it to get the numberOfPages
     return { subjectsData, numberOfPages: Math.ceil(count / Items_Per_Page) };   //return filtered subjects data & (number of pages) that will be used in Pagination

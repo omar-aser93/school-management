@@ -35,7 +35,7 @@ const TeacherForm = ({ type, data, setOpen, relatedData}: {type: "create" | "upd
  
   return (
     //passing "react-hook-form" handleSubmit function, we'll use the server_action but after we pass it to useFormState() hook, to get success/error message
-    <form className="flex flex-col gap-8" onSubmit={handleSubmit((data) => { startTransition(() => {formAction({ ...data, img: img?.secure_url })}) })}>
+    <form className="flex flex-col gap-5" onSubmit={handleSubmit((data) => { startTransition(() => {formAction({ ...data, img: img?.secure_url })}) })}>
       <h1 className="text-xl font-semibold">{type === "create" ? "Create a new teacher" : "Update the teacher"}</h1>
       <span className="text-xs text-gray-400 font-medium"> Authentication Information </span>
       <div className="flex justify-between flex-wrap gap-4">          
@@ -60,6 +60,21 @@ const TeacherForm = ({ type, data, setOpen, relatedData}: {type: "create" | "upd
       </div>
 
       <span className="text-xs text-gray-400 font-medium"> Personal Information </span>
+        {/* Cloudinary Widget to upload user image */}    
+        <CldUploadWidget uploadPreset="school" onSuccess={(result, { widget }) => { setImg(result.info); widget.close(); }} >
+          {({ open }) => {
+            return (
+              <div className="flex flex-col justify-center items-center gap-5"> 
+                <div className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer" onClick={() => open()} >
+                  <Image src="/upload.png" alt="" width={28} height={28} />
+                  <span>Upload a photo</span>
+                </div>
+                {img && <img src={img?.secure_url} alt="user" width={100}/>}
+              </div>
+            );
+          }}
+        </CldUploadWidget>
+
         <div className="flex justify-between flex-wrap gap-4">
           <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">First Name</label>
@@ -93,7 +108,7 @@ const TeacherForm = ({ type, data, setOpen, relatedData}: {type: "create" | "upd
         
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Birthday</label>
-          <input type="date" {...register("birthday")} defaultValue={data?.birthday} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
+          <input type="date" {...register("birthday")} defaultValue={data?.birthday.toISOString().split("T")[0]} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
           {errors.birthday?.message && ( <p className="text-xs text-red-400">{errors.birthday.message.toString()}</p> )}
         </div>
         
@@ -117,26 +132,11 @@ const TeacherForm = ({ type, data, setOpen, relatedData}: {type: "create" | "upd
           {errors.subjects?.message && (<p className="text-xs text-red-400"> {errors.subjects.message.toString()} </p>)}
         </div>
 
-        {/* Cloudinary Widget to upload user image */}    
-        <CldUploadWidget uploadPreset="school" onSuccess={(result, { widget }) => { setImg(result.info); widget.close(); }} >
-          {({ open }) => {
-            return (
-              <div className="flex flex-col justify-center items-center gap-5"> 
-                <div className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer" onClick={() => open()} >
-                  <Image src="/upload.png" alt="" width={28} height={28} />
-                  <span>Upload a photo</span>
-                </div>
-                <img src={img?.secure_url} alt="user" width={100}/>
-              </div>
-            );
-          }}
-        </CldUploadWidget>
-
         {/* Sending the id in a hidden input, used in (update & delete) server_action */}
         {data && (
-          <div className="flex flex-col gap-2 w-full md:w-1/4" hidden>
+          <div className="invisible flex flex-col gap-2 w-full md:w-1/4" >
             <label className="text-xs text-gray-500">Id</label>
-            <input type="text" {...register("id")} defaultValue={data?.id} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" />
+            <input type="text" {...register("id")} defaultValue={data?.id} className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" hidden/>
             {errors?.id?.message && ( <p className="text-xs text-red-400">{errors?.id.message.toString()}</p> )}
           </div> )}
       </div>

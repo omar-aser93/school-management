@@ -9,22 +9,18 @@ import { auth } from "@clerk/nextjs/server";
 
 // createExam Server_action, we pass (success/error State , Form Data after validation by the Zod Validation file)
 export const createExam = async (currentState: { success: boolean; error: boolean }, data: ExamSchemaType) => {
-  // const { userId, sessionClaims } = auth();
-  // const role = (sessionClaims?.metadata as { role?: string })?.role;
+  
+  //get current user id & his role, we'll use it to add condition for teachers
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;  
   try {
-    // if (role === "teacher") {
-    //   const teacherLesson = await prisma.lesson.findFirst({
-    //     where: {
-    //       teacherId: userId!,
-    //       id: data.lessonId,
-    //     },
-    //   });
+    //first: if current user is teacher, check if the recieved lesson belongs to current teacher, if not -> {error: true} 
+    if (role === "teacher") {
+      const teacherLesson = await prisma.lesson.findFirst({ where: { teacherId: userId!, id: data.lessonId } });
+      if (!teacherLesson) { return { success: false, error: true }; }
+    }
 
-    //   if (!teacherLesson) {
-    //     return { success: false, error: true };
-    //   }
-    // }
-
+    //prisma.create() to create new Exam in the DB, set data object with received {inputs data}
     await prisma.exam.create({
       data: {
         title: data.title,
@@ -33,7 +29,7 @@ export const createExam = async (currentState: { success: boolean; error: boolea
         lessonId: data.lessonId,
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/exams");             //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -45,22 +41,18 @@ export const createExam = async (currentState: { success: boolean; error: boolea
 
 // updateExam Server_action, we pass (success/error State , Form Data after validation by the Zod Validation file)
 export const updateExam = async (currentState: { success: boolean; error: boolean }, data: ExamSchemaType) => {
-  // const { userId, sessionClaims } = auth();
-  // const role = (sessionClaims?.metadata as { role?: string })?.role;
+ 
+  //get current user id & his role, we'll use it to add condition for teachers
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;  
   try {
-    // if (role === "teacher") {
-    //   const teacherLesson = await prisma.lesson.findFirst({
-    //     where: {
-    //       teacherId: userId!,
-    //       id: data.lessonId,
-    //     },
-    //   });
+    //first: if current user is teacher, check if the recieved lesson belongs to current teacher, if not -> {error: true} 
+    if (role === "teacher") {
+      const teacherLesson = await prisma.lesson.findFirst({ where: { teacherId: userId!, id: data.lessonId } });
+      if (!teacherLesson) { return { success: false, error: true }; }
+    }
 
-    //   if (!teacherLesson) {
-    //     return { success: false, error: true };
-    //   }
-    // }
-
+    //prisma.update() to update an Exam by id in the DB, set data object with received {inputs data}
     await prisma.exam.update({
       where: { id: data.id },
       data: {
@@ -70,7 +62,7 @@ export const updateExam = async (currentState: { success: boolean; error: boolea
         lessonId: data.lessonId,
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/exams");             //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -80,28 +72,30 @@ export const updateExam = async (currentState: { success: boolean; error: boolea
 
 
 
-// deleteExam Server_action, we pass (success/error State, FormData because we're not using "react-hook-form" & Validation with delete form )
-export const deleteExam = async (currentState: { success: boolean; error: boolean }, data: FormData) => {  
-  // const { userId, sessionClaims } = auth();
-  // const role = (sessionClaims?.metadata as { role?: string })?.role;
+// deleteExam Server_action, we pass (success/error State, FormData directly because we're not using "react-hook-form" & Validation with delete form )
+export const deleteExam = async (currentState: { success: boolean; error: boolean }, formData: FormData) => {  
+  //get current user id & his role, we'll use it to add condition for teachers
+  const { userId, sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
   try {
-    //prisma.delete() to delete a subject in the DB by the id
+    //prisma.delete() to delete a subject in the DB by the id + condition, if current user is teacher: only get his own lessons by his id, if admin then no condition
     await prisma.exam.delete({
-      where: { id: parseInt(data.get("id") as string),
-        // ...(role === "teacher" ? { lesson: { teacherId: userId! } } : {}),
+      where: { id: parseInt(formData.get("id") as string),
+        ...(role === "teacher" ? { lesson: { teacherId: userId! } } : {}),
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/exams");             //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
     return { success: false, error: true };    //return error, will receive it in useFormState() & show it 
   }
 };
+
 
 
 // getExams function, to fetch filtered Exams data 
-export const getExams = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getExams = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check the query value, as we need to get either 1 of 3 filtered lists: 1st list (search by exam_name list) we get query directly from the search input   
       2nd list (exams of specific student_by_his_class list) using the relation between exam model & class model
@@ -163,6 +157,7 @@ export const getExams = async ( query: any, currentPage: number, Items_Per_Page:
       },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { title: sort },
     });
     const count = await prisma.exam.count({ where: q });        //get filtered exams count, we use it to get the numberOfPages
     return { examsData, numberOfPages: Math.ceil(count / Items_Per_Page) };   //return filtered exams data & (number of pages) that will be used in Pagination

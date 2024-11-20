@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";      //getting Typescript types from th
 
 
 // getAssignments function, to fetch filtered assignments data
-export const getAssignments = async ( query: any, currentPage: number, Items_Per_Page: number) => {
+export const getAssignments = async ( query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check query value, as we need to get either 1 of 3 filtered lists: 1st list (search by subject list) we get query directly from the search input   
       2nd list (Assignments of specific student_by_his_class list) using the relation between assignment model & class model
@@ -68,6 +68,7 @@ export const getAssignments = async ( query: any, currentPage: number, Items_Per
       },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { title: sort },
     });
     const count = await prisma.assignment.count({ where: q }); //get filtered assignments count, we use it to get the numberOfPages
     return { assignmentsData, numberOfPages: Math.ceil(count / Items_Per_Page) }; //return filtered assignments data & (number of pages) that will be used in Pagination

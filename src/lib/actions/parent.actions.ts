@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";      //getting Typescript types from th
 
 
 // getParents function, to fetch filtered parents data
-export const getParents = async (query: any, currentPage: number, Items_Per_Page: number) => {
+export const getParents = async (query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
 
     //we check received query value, as we need to get (search by parent_name list) we get the query directly from the search input   
@@ -24,6 +24,7 @@ export const getParents = async (query: any, currentPage: number, Items_Per_Page
       include: { students: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { name: sort },
     });
     const count = await prisma.parent.count({ where: q });     //get filtered parents count, we use it to get the numberOfPages
     return { parentsData, numberOfPages: Math.ceil(count / Items_Per_Page) };   //return filtered parents data & (number of pages) that will be used in Pagination

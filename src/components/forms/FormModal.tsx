@@ -59,7 +59,7 @@ const FormModal = ({ table, type, data, id, relatedData }: {
       {open && (
         //modal outer container, closes onClick() .. inner container will use stopPropagation() to prevent the parent closing onClick() event
         <div onClick={() => setOpen(false)} className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div onClick={(e) => e.stopPropagation()} className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
+          <div onClick={(e) => e.stopPropagation()} className="bg-white overflow-y-auto max-h-screen p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
           
           {/*All delete forms design are similar: in the modal, show this form that will use server_action onSubmit but after we pass it to useFormState() hook to get success/error message */}
           { type === "delete" && id ? (

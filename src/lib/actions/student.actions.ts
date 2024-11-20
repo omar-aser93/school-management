@@ -10,12 +10,11 @@ import { Prisma } from "@prisma/client";       //getting Typescript types from t
 // createStudent Server_action, we pass (success/error State , Form Data after validation by the Zod Validation file)
 export const createStudent = async (currentState: { success: boolean; error: boolean }, data: StudentSchemaType) => {
   try {
-    
+    //check the class capacity: if calss is full , return error so we can choose another class for the new student
     const classItem = await prisma.class.findUnique({
       where: { id: data.classId },
       include: { _count: { select: { students: true } } },
     });
-
     if (classItem && classItem.capacity === classItem._count.students) { return { success: false, error: true } }
     
     //clerkClient.users.createUser() to create a clerk authenticated user, check him in this project clerk page
@@ -45,7 +44,7 @@ export const createStudent = async (currentState: { success: boolean; error: boo
         parentId: data.parentId,
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/students");          //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -86,7 +85,7 @@ export const updateStudent = async (currentState: { success: boolean; error: boo
         parentId: data.parentId,
       },
     });
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/students");          //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -96,14 +95,13 @@ export const updateStudent = async (currentState: { success: boolean; error: boo
 
 
 
-// deleteStudent Server_action, we pass (success/error State, FormData because we're not using "react-hook-form" & Validation with delete form )
+// deleteStudent Server_action, we pass (success/error State, FormData directly because we're not using "react-hook-form" & Validation with delete form )
 export const deleteStudent = async (currentState: { success: boolean; error: boolean }, formData: FormData) => {
-  const id = formData.get("id") as string;
   try {
     //clerkClient.users.deleteUser() to delete a clerk user by the id, prisma.delete() to delete a student in the DB by the id
     await clerkClient.users.deleteUser(formData.get("id") as string);      
     await prisma.student.delete({ where: { id: formData.get("id") as string } });  
-    revalidatePath("/list/subjects");          //auto update the path's data after the action (create,delete,update)
+    revalidatePath("/list/students");          //auto update the path's data after the action (create,delete,update)
     return { success: true, error: false };    //return success, will receive it in useFormState() & show it in toast
   } catch (err) {
     console.log(err);
@@ -114,7 +112,7 @@ export const deleteStudent = async (currentState: { success: boolean; error: boo
 
 
 // getStudents function, to fetch filtered Students data
-export const getStudents = async (query: any, currentPage: number, Items_Per_Page: number) => {
+export const getStudents = async (query: any, currentPage: number, Items_Per_Page: number, sort: any) => {
   try {
     /*we check query value, as we need to get either 1 of 2 filtered lists: 1st list (search by student_name list) we get query directly from the search input   
       2nd list (students of specific teacher list) more complex relation query: each student have class, each class have the lessons of the teacher */
@@ -142,6 +140,7 @@ export const getStudents = async (query: any, currentPage: number, Items_Per_Pag
       include: { class: true },
       take: Items_Per_Page,
       skip: Items_Per_Page * (currentPage - 1),
+      orderBy: { name: sort },
     });
     const count = await prisma.student.count({ where: q });    //get filtered students count, we use it to get the numberOfPages
     return { studentsData, numberOfPages: Math.ceil(count / Items_Per_Page) };   //return filtered students data & (number of pages) that will be used in Pagination
@@ -161,6 +160,25 @@ export const getStudent = async (id: string) => {
         where: { id: id },
         include: { class: { include: { _count: { select: { lessons: true } } } } }
      });     
+  } catch (err) {
+    console.log(err);  
+     //return { success: false, error: true };  
+  }
+};
+
+
+
+// getStudentAttendance function, to calculate single student Attendance 
+export const getStudentAttendance = async (id: string) => {
+  try {
+    //find a Student Attendance using prisma.findUnique(id) & when date's year is greater than last year
+    const attendance = await prisma.attendance.findMany({
+      where: { studentId: id, date: { gte: new Date(new Date().getFullYear(), 0, 1) }}
+    });      
+    //calculate Attendance percentage & return it
+    const presentDays = attendance.filter((day) => day.present).length;      //days student attended
+    const percentage = (presentDays / attendance.length) * 100;              //days_attended / total_attendance_days
+    return percentage;
   } catch (err) {
     console.log(err);  
      //return { success: false, error: true };  

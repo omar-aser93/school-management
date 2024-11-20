@@ -17,13 +17,13 @@ export const metadata = {
   description: "Next.js School Management System",
 };
 
-//clerk auth() hook to get current session_user data & get his role from the metadata, will use it with the logo link
-const { sessionClaims } = auth();
-const role = (sessionClaims?.metadata as { role?: string })?.role;
-
-
 // Typescript Type for a layout {children} is React.ReactNode 
 export default function DashboardLayout({children}: Readonly<{ children: React.ReactNode }>) {
+
+  //clerk auth() hook to get current session_user data & get his role from the metadata, will use it with the logo link
+  const { sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
+
   return (
     <ClerkProvider>
     <html lang="en">
