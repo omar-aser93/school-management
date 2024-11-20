@@ -1,11 +1,12 @@
 import { getHomeAnnouncements } from "@/lib/actions/announcement.actions";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 
 const Announcements = async () => {
 
   const data = await getHomeAnnouncements();        //using getHomeAnnouncements() function to Fetch 1st three Announcements
-  if (!data) { return <div></div> }
+  if (!data) { return notFound() }                  //if no data -> return not found (from next/navigation)
 
   return (
     <div className="bg-white p-4 rounded-md">
